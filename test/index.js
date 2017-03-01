@@ -93,7 +93,7 @@ describe('apiClient', function () {
                         }
                     });
 
-                    var recordFilePath = recordFolder + '\\' + 'api\\v1\\banks'.split('\\').slice(MOCK_DIR_LEVEL).join('\\') + '.json';
+                    var recordFilePath = recordFolder + path.sep + 'api/v1/banks'.split('/').slice(MOCK_DIR_LEVEL).join(path.sep) + '.json';
                     // console.log(recordFilePath);
                     if (fs.existsSync(recordFilePath)) {
                         fs.unlinkSync(recordFilePath);
