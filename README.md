@@ -1,6 +1,14 @@
 # koa-api-client
-1.x support koa 1.x
-2.x will be publish
+
+## 安装
+```
+npm install koa-api-client
+```
+
+* v1.x for koa 1.x
+```
+npm install koa-api-client@~1
+```
 
 ## 支持的功能:
 
