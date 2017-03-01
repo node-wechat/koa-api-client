@@ -1,4 +1,6 @@
 # koa-api-client
+1.x support koa 1.x
+2.x will be publish
 
 ## 支持的功能:
 
