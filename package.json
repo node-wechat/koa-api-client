@@ -1,7 +1,7 @@
 {
   "name": "koa-api-client",
-  "version": "1.0.4",
-  "description": "co api client for http request",
+  "version": "2.0.4",
+  "description": "promise api client for http request",
   "main": "index.js",
   "scripts": {
     "test": "mocha test"
@@ -14,7 +14,8 @@
     "json",
     "restClient",
     "http",
-    "co"
+    "promise",
+    "mock"
   ],
   "files": [
     "lib/"
