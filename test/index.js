@@ -3,11 +3,9 @@
  */
 'use strict'
 
-const co = require('co')
-    , ApiClient = require('..')
+const ApiClient = require('..')
     , expect = require('chai').expect
     , assert = require('chai').assert
-    , sleep = require('co-sleep')
     , path = require('path')
     , fs = require('fs')
     , log4js = require('log4js');
@@ -41,108 +39,100 @@ describe('apiClient', function () {
         it('>normal', function (done) {
             this.timeout(20000);
 
-            co(function *() {
-                var apiClient = new ApiClient(baseUri, {});
+            let apiClient = new ApiClient(baseUri, {});
 
-                var content = yield apiClient.get('/banks');
-
+            apiClient.get('/banks').then(res => {
                 //返回内容不为空
-                expect(content).to.not.be.empty;
+                expect(res).to.not.be.empty;
 
                 //数据内容包含某个节点
-                expect(content).to.have.property('data');
+                expect(res).to.have.property('data');
 
                 done();
-            }).catch(function (err) {
+            }).catch(err => {
                 done(err);
-            });
+            })
         });
 
         it('>params not in url', function (done) {
             this.timeout(20000);
 
-            co(function *() {
-                var apiClient = new ApiClient(baseUri, {});
+            let apiClient = new ApiClient(baseUri, {});
 
-                var content = yield apiClient.get('/banks', {
-                    type: 1
-                });
-
-                try {
-                    //数据内容包含某个节点
-                    expect(content.data['ABC']).to.have.property('name');
-                    done();
-                }
-                catch (err) {
-                    done(err);
-                }
-            });
+            apiClient.get('/banks', {
+                type: 1
+            }).then(res => {
+                //数据内容包含某个节点
+                expect(res.data['ABC']).to.have.property('name');
+                done();
+            }).catch(err => {
+                done(err);
+            })
         });
 
         it('>record data', function (done) {
             this.timeout(20000);
 
-            co(function *() {
-                try {
-                    var recordFolder = path.join(__dirname, '/mock');
-                    var apiClient = new ApiClient(baseUri, {
-                        record: {
-                            suffix: '.json',
-                            dirLevel: MOCK_DIR_LEVEL,
-                            base: recordFolder
-                        }
-                    });
-
-                    var recordFilePath = recordFolder + '\\' + 'api\\v1\\banks'.split('\\').slice(MOCK_DIR_LEVEL).join('\\') + '.json';
-                    // console.log(recordFilePath);
-                    if (fs.existsSync(recordFilePath)) {
-                        fs.unlinkSync(recordFilePath);
+            try {
+                let recordFolder = path.join(__dirname, '/mock');
+                let apiClient = new ApiClient(baseUri, {
+                    record: {
+                        suffix: '.json',
+                        dirLevel: MOCK_DIR_LEVEL,
+                        base: recordFolder
                     }
+                });
 
-                    var content = yield apiClient.get('/banks', {
-                        type: 1
-                    });
+                let recordFilePath = recordFolder + path.sep + 'api/v1/banks'.split('/').slice(MOCK_DIR_LEVEL).join(path.sep) + '.json';
+                if (fs.existsSync(recordFilePath)) {
+                    fs.unlinkSync(recordFilePath);
+                }
 
+                apiClient.get('/banks', {
+                    type: 1
+                }).then(res => {
                     fs.readFile(recordFilePath, 'utf8', function (err, data) {
                         assert.deepEqual(JSON.parse(data)
-                            , content, 'file content is some with request content');
+                            , res, 'file content is some with request content');
 
                         done(err);
                     });
-                }
-                catch (err) {
+                }).catch(err => {
                     done(err);
-                }
-            });
+                })
+            }
+            catch (err) {
+                done(err);
+            }
         });
 
         it('>read from mock data', function (done) {
             this.timeout(20000);
 
-            co(function *() {
-                try {
-                    var recordFolder = path.join(__dirname, '/mock');
-                    var apiClient = new ApiClient(baseUri, {
-                        mock: {
-                            suffix: '.json',
-                            dirLevel: MOCK_DIR_LEVEL,
-                            base: recordFolder
-                        }
-                    });
+            try {
+                let recordFolder = path.join(__dirname, '/mock');
+                let apiClient = new ApiClient(baseUri, {
+                    mock: {
+                        suffix: '.json',
+                        dirLevel: MOCK_DIR_LEVEL,
+                        base: recordFolder
+                    }
+                });
 
-                    var content = yield apiClient.get('/banks', {
-                        type: 1
-                    });
-
+                apiClient.get('/banks', {
+                    type: 1
+                }).then(res => {
                     //数据内容包含某个节点
-                    expect(content.data['ABC']).to.have.property('name');
+                    expect(res.data['ABC']).to.have.property('name');
 
                     done();
-                }
-                catch (err) {
+                }).catch(err => {
                     done(err);
-                }
-            });
+                })
+            }
+            catch (err) {
+                done(err);
+            }
         })
     });
 });

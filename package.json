@@ -22,18 +22,16 @@
   "author": "Rdshoep",
   "license": "MIT",
   "dependencies": {
-    "co-fs": "^1.2.0",
-    "co-request": "^1.0.0",
-    "co-sleep": "0.0.1",
     "debug": "^2.2.0",
     "json-format": "^0.1.2",
-    "log4js": "^0.6.38",
+    "log4js": "^1.1.0",
     "mkdirp": "^0.5.1",
+    "request": "^2.79.0",
+    "sleep.promise": "^1.0.0",
     "url": "^0.11.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "co": "^4.6.0",
     "koa": "^1.1.1",
     "koa-bodyparser": "^2.0.1",
     "koa-router": "^5.4.0"

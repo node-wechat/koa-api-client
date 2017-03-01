@@ -6,9 +6,9 @@
  */
 "use strict";
 
-var utils = require('./lib/utils');
-var request = require('./lib/request');
-var mock = require('./lib/mock');
+const utils = require('./lib/utils')
+    , request = require('./lib/request')
+    , mock = require('./lib/mock');
 
 function ApiClient(baseUri, opts) {
     this.baseUri = utils.parseUriConfigToString(baseUri, false);
@@ -17,16 +17,13 @@ function ApiClient(baseUri, opts) {
         timeout: 15000, //网络请求超时时间
         mock: false, //访问模拟数据 支持 {  sleep: 1000  }  //延时时间
         record: false, //记录请求返回的数据
-        beforeEnd: function (data) { //全局数据过滤器，对返回的数据做统一的处理
-            return data
-        }
+        beforeEnd: res => res //全局数据过滤器，对返回的数据做统一的处理
     }, opts);
 }
 
-ApiClient.prototype.request = function*(method, url, data, config) {
+ApiClient.prototype.request = function (method, url, data, config) {
     //合并参数
-    let opt = Object.assign({}, this.option, config)
-        , beforeEnd = opt.beforeEnd;
+    let opt = Object.assign({}, this.option, config);
 
     //获取对应的地址前缀  优先使用参数中的跟路径
     let baseUri = this.baseUri;
@@ -40,33 +37,35 @@ ApiClient.prototype.request = function*(method, url, data, config) {
         url = baseUri + url;
     }
 
-    let res
-        , mockConfig = opt.mock
-        , recordConfig = opt.record;
+    let mockConfig = opt.mock
+        , recordConfig = opt.record
+        , promisify;
 
     //如果mockConfig不为空,则表明需要读取模拟数据。
     //否则进行正常的数据模拟
     if (mockConfig) {
-        res = yield mock.load(url, Object.assign({
+        promisify = mock.load(url, Object.assign({
             sleep: 1000
         }, mockConfig));
     } else {
-        res = yield request(method, url, data, opt);
-
-        //如果mockConfig需要记录,则将获取后的数据保存
-        //TODO 如何优化记录方式，同一个请求的数据可以避免记录或者根据参数记录对应的数据
-        if (recordConfig) {
-            yield mock.save(url, res, recordConfig);
-        }
+        promisify = request(method, url, data, opt)
+            .then(res => {
+                //如果mockConfig需要记录,则将获取后的数据保存
+                //TODO 如何优化记录方式，同一个请求的数据可以避免记录或者根据参数记录对应的数据
+                if (recordConfig) {
+                    return mock.save(url, res, recordConfig);
+                }
+                return res;
+            });
     }
 
-    return beforeEnd(res);
+    return promisify.then(opt.beforeEnd);
 };
 
 //自动设置相应的方法
 ["get", "patch", "post", "put", "head", "del"].forEach(function (method) {
-    ApiClient.prototype[method] = function*() {
-        return yield ApiClient.prototype.request.apply(this
+    ApiClient.prototype[method] = function () {
+        return ApiClient.prototype.request.apply(this
             , [method].concat(Array.prototype.slice.apply(arguments)));
     }
 });
