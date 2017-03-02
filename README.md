@@ -6,7 +6,7 @@
 npm install koa-api-client
 ```
 
-* 1.x for koa 1.x
+* [1.x](https://github.com/node-wechat/koa-api-client/blob/v1.x/README.md) for koa 1.x
 ```
 npm install koa-api-client@~1
 ```
