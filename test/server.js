@@ -14,10 +14,10 @@ const App = require('koa')
 
 let app = new App();
 
-// app.use(function*(next){
-//     console.log('request from ' + this.request.originalUrl);
+// app.use(function (cxt, next){
+//     console.log('request from ' + cxt.request.originalUrl);
 //     yield next;
-//     console.log('return data: ' + JSON.stringify(this.body));
+//     console.log('return data: ' + JSON.stringify(cxt.body));
 // })
 
 app.use(bodyParser());
@@ -26,11 +26,11 @@ let router = new Router({
     prefix: '/api/v1'
 });
 
-router.get('/banks', function *() {
-    let type = this.request.body['type'];
+router.get('/banks', function (cxt, next) {
+    let type = cxt.request.body['type'];
 
     if (type == '1') {
-        this.body = {
+        cxt.body = {
             data: {
                 'ABC': {
                     name: 'ABC'
@@ -40,7 +40,7 @@ router.get('/banks', function *() {
         return;
     }
 
-    this.body = {
+    cxt.body = {
         data: {
             'ABC': 'bank'
         }

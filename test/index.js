@@ -70,11 +70,40 @@ describe('apiClient', function () {
             })
         });
 
-        it('>record data', function (done) {
+        it('>read from mock data', function (done) {
             this.timeout(20000);
 
             try {
                 let recordFolder = path.join(__dirname, '/mock');
+                let apiClient = new ApiClient(baseUri, {
+                    mock: {
+                        suffix: '.json',
+                        dirLevel: MOCK_DIR_LEVEL,
+                        base: recordFolder
+                    }
+                });
+
+                apiClient.get('/banks', {
+                    type: 1
+                }).then(res => {
+                    //数据内容包含某个节点
+                    expect(res.data['ABC']).to.have.property('name');
+
+                    done();
+                }).catch(err => {
+                    done(err);
+                })
+            }
+            catch (err) {
+                done(err);
+            }
+        });
+
+        it('>record data', function (done) {
+            this.timeout(20000);
+
+            try {
+                let recordFolder = path.join(__dirname, '/mock/gen');
                 let apiClient = new ApiClient(baseUri, {
                     record: {
                         suffix: '.json',
@@ -105,34 +134,5 @@ describe('apiClient', function () {
                 done(err);
             }
         });
-
-        it('>read from mock data', function (done) {
-            this.timeout(20000);
-
-            try {
-                let recordFolder = path.join(__dirname, '/mock');
-                let apiClient = new ApiClient(baseUri, {
-                    mock: {
-                        suffix: '.json',
-                        dirLevel: MOCK_DIR_LEVEL,
-                        base: recordFolder
-                    }
-                });
-
-                apiClient.get('/banks', {
-                    type: 1
-                }).then(res => {
-                    //数据内容包含某个节点
-                    expect(res.data['ABC']).to.have.property('name');
-
-                    done();
-                }).catch(err => {
-                    done(err);
-                })
-            }
-            catch (err) {
-                done(err);
-            }
-        })
     });
 });

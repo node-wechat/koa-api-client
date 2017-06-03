@@ -120,14 +120,16 @@ log4js.configure({
 
 ## TODO
 1. 需要考虑如何支持参数在链接上形式下，数据如何模拟读取和保存
+2. 通过mock数据约定格式，校验后台生产环境返回的数据，避免格式变更导致的前端报错
+3. 增加自定义的数据过滤函数池，统一对后台返回数据做处理。例如，蛇底转换成驼峰~
 
 ### update list
 
-1.0.4
+#####2.0.5
+use json5 to parse mock file, instead of json default
 
+#####2.0.4
 优化ApiClient的使用场景，允许无baseUri的实例化(`utils.parseUriConfigToString`增加`strictMode`参数)
 
-1.0.3
-
+#####2.0.3
 修复url上存在参数后，自动补充参数错误的BUG
-

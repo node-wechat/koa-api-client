@@ -1,0 +1,8 @@
+{
+    // json node comments
+    "data": {
+        "ABC": {
+            "name": "ABC"
+        }
+    }
+}
