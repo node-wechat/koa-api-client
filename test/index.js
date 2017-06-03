@@ -21,7 +21,7 @@ let port = 3002
 //log4js log config
 log4js.configure({
     appenders: [
-        // { type: 'console' },
+        { type: 'console' },
     ]
 });
 
@@ -30,6 +30,8 @@ let baseUri = {
     domain: '127.0.0.1',
     port: port,
     prefix: '/api/v1'
+}, defaultOpt = {
+    log: log4js.getLogger('koa-api-client')
 };
 
 app.listen(port, function () {
@@ -42,7 +44,7 @@ describe('apiClient', function () {
             this.timeout(20000);
 
             co(function *() {
-                var apiClient = new ApiClient(baseUri, {});
+                var apiClient = new ApiClient(baseUri, defaultOpt);
 
                 var content = yield apiClient.get('/banks');
 
@@ -62,7 +64,7 @@ describe('apiClient', function () {
             this.timeout(20000);
 
             co(function *() {
-                var apiClient = new ApiClient(baseUri, {});
+                var apiClient = new ApiClient(baseUri, defaultOpt);
 
                 var content = yield apiClient.get('/banks', {
                     type: 1
@@ -85,13 +87,13 @@ describe('apiClient', function () {
             co(function *() {
                 try {
                     var recordFolder = path.join(__dirname, '/mock');
-                    var apiClient = new ApiClient(baseUri, {
+                    var apiClient = new ApiClient(baseUri, Object.assign({}, defaultOpt, {
                         mock: {
                             suffix: '.json',
                             dirLevel: MOCK_DIR_LEVEL,
                             base: recordFolder
                         }
-                    });
+                    }));
 
                     var content = yield apiClient.get('/banks', {
                         type: 1
@@ -114,13 +116,13 @@ describe('apiClient', function () {
             co(function *() {
                 try {
                     var recordFolder = path.join(__dirname, '/mock/gen');
-                    var apiClient = new ApiClient(baseUri, {
+                    var apiClient = new ApiClient(baseUri, Object.assign({}, defaultOpt, {
                         record: {
                             suffix: '.json',
                             dirLevel: MOCK_DIR_LEVEL,
                             base: recordFolder
                         }
-                    });
+                    }));
 
                     var recordFilePath = recordFolder + path.sep + 'api/v1/banks'.split('/').slice(MOCK_DIR_LEVEL).join(path.sep) + '.json';
                     // console.log(recordFilePath);

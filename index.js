@@ -6,9 +6,10 @@
  */
 "use strict";
 
-var utils = require('./lib/utils');
-var request = require('./lib/request');
-var mock = require('./lib/mock');
+var utils = require('./lib/utils')
+    , request = require('./lib/request')
+    , mock = require('./lib/mock')
+    , log = require('./lib/log');
 
 function ApiClient(baseUri, opts) {
     this.baseUri = utils.parseUriConfigToString(baseUri, false);
@@ -21,6 +22,9 @@ function ApiClient(baseUri, opts) {
             return data
         }
     }, opts);
+
+    //inject opt's log
+    log.injectLogger(this.option.log);
 }
 
 ApiClient.prototype.request = function*(method, url, data, config) {
@@ -60,7 +64,11 @@ ApiClient.prototype.request = function*(method, url, data, config) {
         }
     }
 
-    return beforeEnd(res);
+    if(beforeEnd && typeof beforeEnd === 'function'){
+        return beforeEnd(res);
+    }
+
+    return res;
 };
 
 //自动设置相应的方法

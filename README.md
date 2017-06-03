@@ -47,8 +47,8 @@ let res = yield api.get('/banks', {type: 1});
 let userApi = new ApiClient({domain: 'user.apiserver.com', prefix: '/v1'});
 let activityApi = new ApiClient('http://activity.apiserver.com/v2');
 
-let user = yield userApi.post('/users/add', {name: 'userName', age: 18}
-let res = yield activityApi.get('/activities', {startTime: '20170228'}
+let user = yield userApi.post('/users/add', {name: 'userName', age: 18})
+let res = yield activityApi.get('/activities', {startTime: '20170228'})
 ```
 
 ### 3.读取模拟数据
@@ -102,27 +102,42 @@ fs.readFile(recordFilePath, 'utf8', function (err, data) {
 ```
 
 ### 5.开启数据日志记录
+#### persistent mode log for production environment
 ```js
-var log4js = require('log4js');
+var log4js = require('log4js'); //log4js@~1
 log4js.configure({
       appenders: [
             { type: 'console' },
             { type: 'file', filename: 'logs/api.log', category: 'koa-api-client' }
       ]
 });
+
+let api = new ApiClient('http://api.server.com/v1', {
+    log: log4js.getLogger('koa-api-client')
+});
 ```
+You can use any logger engine instance, it will detect the log node or log's info node(require type:function).
+
+#### log for debug
+we use the `debug` lib to console logs; set DEBUG=koa-api-client to console logs, more [docs](https://github.com/visionmedia/debug#windows-note).
+
 
 ## TODO
 1. 需要考虑如何支持参数在链接上形式下，数据如何模拟读取和保存
+2. 通过mock数据约定格式，校验后台生产环境返回的数据，避免格式变更导致的前端报错
+3. 增加自定义的数据过滤函数池，统一对后台返回数据做处理。例如，蛇底转换成驼峰~
 
 ### update list
 
-#####1.0.5
+##### 1.1.0
+remove log4js module, accept log implement from option params. 
+
+##### 1.0.5
 use json5 to parse mock file, instead of json default
 
-#####1.0.4
+##### 1.0.4
 优化ApiClient的使用场景，允许无baseUri的实例化(`utils.parseUriConfigToString`增加`strictMode`参数)
 
-#####1.0.3
+##### 1.0.3
 修复url上存在参数后，自动补充参数错误的BUG
 
