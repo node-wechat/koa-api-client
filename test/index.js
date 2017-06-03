@@ -79,12 +79,41 @@ describe('apiClient', function () {
             });
         });
 
-        it('>record data', function (done) {
+        it('>read from mock data', function (done) {
             this.timeout(20000);
 
             co(function *() {
                 try {
                     var recordFolder = path.join(__dirname, '/mock');
+                    var apiClient = new ApiClient(baseUri, {
+                        mock: {
+                            suffix: '.json',
+                            dirLevel: MOCK_DIR_LEVEL,
+                            base: recordFolder
+                        }
+                    });
+
+                    var content = yield apiClient.get('/banks', {
+                        type: 1
+                    });
+
+                    //数据内容包含某个节点
+                    expect(content.data['ABC']).to.have.property('name');
+
+                    done();
+                }
+                catch (err) {
+                    done(err);
+                }
+            });
+        });
+
+        it('>record data', function (done) {
+            this.timeout(20000);
+
+            co(function *() {
+                try {
+                    var recordFolder = path.join(__dirname, '/mock/gen');
                     var apiClient = new ApiClient(baseUri, {
                         record: {
                             suffix: '.json',
@@ -115,34 +144,5 @@ describe('apiClient', function () {
                 }
             });
         });
-
-        it('>read from mock data', function (done) {
-            this.timeout(20000);
-
-            co(function *() {
-                try {
-                    var recordFolder = path.join(__dirname, '/mock');
-                    var apiClient = new ApiClient(baseUri, {
-                        mock: {
-                            suffix: '.json',
-                            dirLevel: MOCK_DIR_LEVEL,
-                            base: recordFolder
-                        }
-                    });
-
-                    var content = yield apiClient.get('/banks', {
-                        type: 1
-                    });
-
-                    //数据内容包含某个节点
-                    expect(content.data['ABC']).to.have.property('name');
-
-                    done();
-                }
-                catch (err) {
-                    done(err);
-                }
-            });
-        })
     });
 });

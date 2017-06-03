@@ -117,11 +117,12 @@ log4js.configure({
 
 ### update list
 
-1.0.4
+#####1.0.5
+use json5 to parse mock file, instead of json default
 
+#####1.0.4
 优化ApiClient的使用场景，允许无baseUri的实例化(`utils.parseUriConfigToString`增加`strictMode`参数)
 
-1.0.3
-
+#####1.0.3
 修复url上存在参数后，自动补充参数错误的BUG
 
