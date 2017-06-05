@@ -9,7 +9,8 @@
 var utils = require('./lib/utils')
     , Request = require('./lib/request')
     , mock = require('./lib/mock')
-    , log = require('./lib/log');
+    , log = require('./lib/log')
+    , compose = require('koa-compose');
 
 function ApiClient(baseUri, opts) {
     this.baseUri = utils.parseUriConfigToString(baseUri, false);
@@ -40,6 +41,15 @@ function ApiClient(baseUri, opts) {
 
             return accept;
         });
+
+    //set support for requestMiddleware
+    let requestMiddlewares = [];
+    if (this.option.requestMiddleware) {
+        requestMiddlewares = requestMiddlewares.concat(this.option.requestMiddleware);
+    }
+    requestMiddlewares = requestMiddlewares.concat(Request.prototype.send);
+
+    this.composeRequest = compose(requestMiddlewares)
 }
 
 ApiClient.prototype.request = function*(method, url, data, config) {
@@ -70,11 +80,12 @@ ApiClient.prototype.request = function*(method, url, data, config) {
         }, mockConfig));
     } else {
         var request = new Request(method, url, data, opt);
-        yield request.send();
+
+        yield this.composeRequest.apply(request);
+
         res = request.data;
 
         //TODO 1. support async function to deal data
-        //TODO 2. support funcitons before request do,or support middleware to handle before and after request
         res = this.beforeEnd
             .reduce(function (data, fn) {
                 return fn(data);

@@ -166,12 +166,64 @@ var apiClient = new ApiClient(baseUri, Object.assign({
 
 var content = yield apiClient.get('/notfound');
 ```
+
+### 8.request middleware support
+1.server side use snake mode json data
+```js
+router.get('/codeType/snake', function *(){
+    var snakeType = this.request.query['snake_type'];
+    console.log(snakeType)
+
+    var res = {
+        success: true,
+        data: {
+            user_id: 'fadslkjfldaksjlf',
+            user_name: 'userName',
+            user_age: 27
+        }
+    }
+
+    if(snakeType){
+        this.body = res;
+    }
+})
+```
+client side also use snake mode, but now need to use camel mode,
+so can set requestMiddleware to convert request params and response data
+```js
+var apiClient = new ApiClient(baseUri, Object.assign({
+    requestMiddleware: [
+        function *(next){
+            var request = this;
+
+            if(request.params){
+                request.params = humps.decamelizeKeys(request.params);
+            }
+
+            yield next;
+
+            if(request.data){
+                request.data = humps.camelizeKeys(request.data)
+            }
+        }
+    ]
+}, defaultOpt));
+
+var content = yield apiClient.get('/codeType/snake', {
+    snakeType: 1
+});
+```
+now, client use camel mode data without server side changes
+
 ## TODO
 1. 需要考虑如何支持参数在链接上形式下，数据如何模拟读取和保存
 2. 通过mock数据约定格式，校验后台生产环境返回的数据，避免格式变更导致的前端报错
 3. ~~增加自定义的数据过滤函数池，统一对后台返回数据做处理。例如，蛇底转换成驼峰~~[config.beforeEnd](#7.set data handler list by config.beforeEnd)
 
 ### update list
+
+##### 1.2.0
+add advanced options requestMiddleware, you can set make some changes before and after request
 
 ##### 1.1.1
 1.export injectLogger from ApiClient module directly, not from instance config

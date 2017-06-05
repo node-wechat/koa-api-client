@@ -11,7 +11,8 @@ const co = require('co')
     , path = require('path')
     , fs = require('fs')
     , log4js = require('log4js')
-    , xmlParser = require('xml2json');
+    , xmlParser = require('xml2json')
+    , humps = require('humps');
 
 // you can change this level, find diffenrece in the mock folder's record mock file
 const MOCK_DIR_LEVEL = 0;
@@ -211,6 +212,44 @@ describe('apiClient', function () {
 
                 //数据内容包含某个节点
                 expect(content).to.have.property('MSG');
+
+                done();
+            }).catch(function (err) {
+                done(err);
+            });
+        })
+
+        it('>request middleware', function(done){
+            this.timeout(20000);
+
+            co(function *() {
+                var apiClient = new ApiClient(baseUri, Object.assign({
+                    requestMiddleware: [
+                        function *(next){
+                            var request = this;
+
+                            if(request.params){
+                                request.params = humps.decamelizeKeys(request.params);
+                            }
+
+                            yield next;
+
+                            if(request.data){
+                                request.data = humps.camelizeKeys(request.data)
+                            }
+                        }
+                    ]
+                }, defaultOpt));
+
+                var content = yield apiClient.get('/codeType/snake', {
+                    snakeType: 1
+                });
+
+                //返回内容不为空
+                expect(content).to.not.be.empty;
+
+                //数据内容包含某个节点
+                expect(content.data).to.have.property('userName');
 
                 done();
             }).catch(function (err) {

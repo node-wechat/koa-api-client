@@ -10,7 +10,8 @@
 
 const App = require('koa')
     , bodyParser = require('koa-bodyparser')
-    , Router = require('koa-router');
+    , Router = require('koa-router')
+    , humps = require('humps');
 
 let app = new App();
 
@@ -49,6 +50,24 @@ router.get('/banks', function *() {
 
 router.get('/xml', function* (){
     this.body = '<root><data><ABC>bank</ABC></data><code>0</code></root>'
+})
+
+router.get('/codeType/snake', function *(){
+    var snakeType = this.request.query['snake_type'];
+    console.log(snakeType)
+
+    var res = {
+        success: true,
+        data: {
+            user_id: 'fadslkjfldaksjlf',
+            user_name: 'userName',
+            user_age: 27
+        }
+    }
+
+    if(snakeType){
+        this.body = res;
+    }
 })
 
 app.use(router.routes());
