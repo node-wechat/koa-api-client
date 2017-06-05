@@ -7,8 +7,10 @@
 "use strict";
 
 const utils = require('./lib/utils')
-    , request = require('./lib/request')
-    , mock = require('./lib/mock');
+    , Request = require('./lib/request')
+    , mock = require('./lib/mock')
+    , log = require('./lib/log')
+    , compose = require('koa-compose');
 
 function ApiClient(baseUri, opts) {
     this.baseUri = utils.parseUriConfigToString(baseUri, false);
@@ -19,11 +21,39 @@ function ApiClient(baseUri, opts) {
         record: false, //记录请求返回的数据
         beforeEnd: res => res //全局数据过滤器，对返回的数据做统一的处理
     }, opts);
+
+    //initialize the beforeEnd filter for data
+    //TODO 1. support async function to deal data
+    //TODO 2. support funcitons before request do,or support middleware to handle before and after request
+    let beforeEnd =  [];
+    if (this.option.beforeEnd) {
+        beforeEnd = beforeEnd.concat(this.option.beforeEnd);
+    }
+    this.beforeEnd = beforeEnd
+        .filter(function (fn) {
+            var accept = fn && typeof fn === 'function';
+
+            if(!accept){
+                console.warn('ApiClient: beforeEnd config has invalid value, must be function or function array');
+            }
+
+            return accept;
+        });
+
+    //set support for requestMiddleware
+    let requestMiddlewares = [];
+    if (this.option.requestMiddleware) {
+        requestMiddlewares = requestMiddlewares.concat(this.option.requestMiddleware);
+    }
+    requestMiddlewares = requestMiddlewares.concat(Request.prototype.send);
+
+    this.composeRequest = compose(requestMiddlewares)
 }
 
 ApiClient.prototype.request = function (method, url, data, config) {
     //合并参数
-    let opt = Object.assign({}, this.option, config);
+    let opt = Object.assign({}, this.option, config)
+        , apiClient = this;
 
     //获取对应的地址前缀  优先使用参数中的跟路径
     let baseUri = this.baseUri;
@@ -48,10 +78,20 @@ ApiClient.prototype.request = function (method, url, data, config) {
             sleep: 1000
         }, mockConfig));
     } else {
-        promisify = request(method, url, data, opt)
+        var request = new Request(method, url, data, opt);
+
+        promisify = this.composeRequest(request)
+            .then(() => request.data)
             .then(res => {
-                //如果mockConfig需要记录,则将获取后的数据保存
-                //TODO 如何优化记录方式，同一个请求的数据可以避免记录或者根据参数记录对应的数据
+                //TODO 1. support async function to deal data
+                return apiClient.beforeEnd
+                    .reduce(function (data, fn) {
+                        return fn(data);
+                    }, res);
+            })
+            .then(res => {
+                //if record config has valid value, it need to be saved
+                //TODO how to deal the sence that the params(primary id) are in the url, like restful mode
                 if (recordConfig) {
                     return mock.save(url, res, recordConfig);
                 }
@@ -59,7 +99,7 @@ ApiClient.prototype.request = function (method, url, data, config) {
             });
     }
 
-    return promisify.then(opt.beforeEnd);
+    return promisify;
 };
 
 //自动设置相应的方法
@@ -71,3 +111,6 @@ ApiClient.prototype.request = function (method, url, data, config) {
 });
 
 module.exports = ApiClient;
+
+//export inject logger func
+module.exports.injectLogger = log.injectLogger;

@@ -27,7 +27,7 @@ let router = new Router({
 });
 
 router.get('/banks', function (cxt, next) {
-    let type = cxt.request.body['type'];
+    let type = cxt.request.query['type'];
 
     if (type == '1') {
         cxt.body = {
@@ -46,6 +46,26 @@ router.get('/banks', function (cxt, next) {
         }
     };
 })
+
+router.get('/xml', function (cxt){
+    cxt.body = '<root><data><ABC>bank</ABC></data><code>0</code></root>'
+})
+
+router.get('/codeType/snake', function (cxt){
+    var snakeType = cxt.request.query['snake_type'];
+
+    if(snakeType){
+        cxt.body = {
+            success: true,
+            data: {
+                user_id: 'fadslkjfldaksjlf',
+                user_name: 'userName',
+                user_age: 27
+            }
+        };
+    }
+})
+
 
 app.use(router.routes());
 
