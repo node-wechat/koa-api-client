@@ -111,23 +111,71 @@ log4js.configure({
             { type: 'file', filename: 'logs/api.log', category: 'koa-api-client' }
       ]
 });
+//set global logger for ApiClient
+ApiClient.injectLogger(log4js.getLogger('koa-api-client'));
 
-let api = new ApiClient('http://api.server.com/v1', {
-    log: log4js.getLogger('koa-api-client')
-});
+let api = new ApiClient('http://api.server.com/v1', {});
 ```
 You can use any logger engine instance, it will detect the log node or log's info node(require type:function).
 
 #### log for debug
 we use the `debug` lib to console logs; set DEBUG=koa-api-client to console logs, more [docs](https://github.com/visionmedia/debug#windows-note).
 
+### 6.custom dataParser
+support each ApiClient and each request config
+```js
+var xmlParser = require('xml2json');
+var apiClient = new ApiClient(baseUri, Object.assign({
+    dataParser: (err, data) => err ? {
+        success: false,
+        msg: err.message
+    } : JSON.parse(xmlParser.toJson(data)).root
+}, defaultOpt));
 
+// server side will return '<root><data><ABC>bank</ABC></data><code>0</code></root>'
+var content = yield apiClient.get('/xml');
+//content is {data: {ABC: bank}, code: 0}
+```
+
+### 7.set data handler list by config.beforeEnd
+> not support in each request's config
+```js
+var apiClient = new ApiClient(baseUri, Object.assign({
+    beforeEnd: [
+        //if has valid data node, set success is true
+        data => {
+            data['success'] = !!data.data
+            return data;
+        },
+        //convert json node key to upper mode
+        data => {
+            Object.keys(data)
+                .forEach(key => {
+                    data[key.toUpperCase()] = data[key];
+                    delete data[key];
+                })
+            return data;
+        },
+        //log return data
+        data => {
+            console.log(JSON.stringify(data));
+            return data;
+        }
+    ]
+}, defaultOpt));
+
+var content = yield apiClient.get('/notfound');
+```
 ## TODO
 1. 需要考虑如何支持参数在链接上形式下，数据如何模拟读取和保存
 2. 通过mock数据约定格式，校验后台生产环境返回的数据，避免格式变更导致的前端报错
-3. 增加自定义的数据过滤函数池，统一对后台返回数据做处理。例如，蛇底转换成驼峰~
+3. ~~增加自定义的数据过滤函数池，统一对后台返回数据做处理。例如，蛇底转换成驼峰~~[config.beforeEnd](#7.set data handler list by config.beforeEnd)
 
 ### update list
+
+##### 1.1.1
+1.export injectLogger from ApiClient module directly, not from instance config
+2.add dataParser to custom convert data
 
 ##### 1.1.0
 remove log4js module, accept log implement from option params. 

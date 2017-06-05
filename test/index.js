@@ -10,7 +10,8 @@ const co = require('co')
     , sleep = require('co-sleep')
     , path = require('path')
     , fs = require('fs')
-    , log4js = require('log4js');
+    , log4js = require('log4js')
+    , xmlParser = require('xml2json');
 
 // you can change this level, find diffenrece in the mock folder's record mock file
 const MOCK_DIR_LEVEL = 0;
@@ -31,8 +32,11 @@ let baseUri = {
     port: port,
     prefix: '/api/v1'
 }, defaultOpt = {
-    log: log4js.getLogger('koa-api-client')
+
 };
+
+//set logger for ApiClient
+ApiClient.injectLogger(log4js.getLogger('koa-api-client'));
 
 app.listen(port, function () {
     console.log('mock data server started, start test...');
@@ -146,5 +150,72 @@ describe('apiClient', function () {
                 }
             });
         });
+
+        it('>custom dataParser, convert from xml response to json', function(done){
+            this.timeout(20000);
+
+            co(function *() {
+                var apiClient = new ApiClient(baseUri, Object.assign({
+                    dataParser: (err, data) => err ? {
+                        success: false,
+                        msg: err.message
+                    } : JSON.parse(xmlParser.toJson(data)).root
+                }, defaultOpt));
+
+                var content = yield apiClient.get('/xml');
+
+                //返回内容不为空
+                expect(content).to.not.be.empty;
+
+                //数据内容包含某个节点
+                expect(content).to.have.property('data');
+
+                done();
+            }).catch(function (err) {
+                done(err);
+            });
+        })
+
+        it('>set beforeEnd data handler', function(done){
+            this.timeout(20000);
+
+            co(function *() {
+                var apiClient = new ApiClient(baseUri, Object.assign({
+                    beforeEnd: [
+                        //if has valid data node, set success is true
+                        data => {
+                            data['success'] = !!data.data
+                            return data;
+                        },
+                        //convert json node key to upper mode
+                        data => {
+                            Object.keys(data)
+                                .forEach(key => {
+                                    data[key.toUpperCase()] = data[key];
+                                    delete data[key];
+                                })
+                            return data;
+                        },
+                        //log return data
+                        data => {
+                            console.log(JSON.stringify(data));
+                            return data;
+                        }
+                    ]
+                }, defaultOpt));
+
+                var content = yield apiClient.get('/notfound');
+
+                //返回内容不为空
+                expect(content).to.not.be.empty;
+
+                //数据内容包含某个节点
+                expect(content).to.have.property('MSG');
+
+                done();
+            }).catch(function (err) {
+                done(err);
+            });
+        })
     });
 });

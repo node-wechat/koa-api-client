@@ -27,7 +27,7 @@ let router = new Router({
 });
 
 router.get('/banks', function *() {
-    let type = this.request.body['type'];
+    let type = this.request.query['type'];
 
     if (type == '1') {
         this.body = {
@@ -45,6 +45,10 @@ router.get('/banks', function *() {
             'ABC': 'bank'
         }
     };
+})
+
+router.get('/xml', function* (){
+    this.body = '<root><data><ABC>bank</ABC></data><code>0</code></root>'
 })
 
 app.use(router.routes());
