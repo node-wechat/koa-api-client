@@ -233,8 +233,8 @@ now, client use camel mode data without server side changes
 ##### 2.0.5
 use json5 to parse mock file, instead of json default
 
-#####2.0.4
+##### 2.0.4
 优化ApiClient的使用场景，允许无baseUri的实例化(`utils.parseUriConfigToString`增加`strictMode`参数)
 
-#####2.0.3
+##### 2.0.3
 修复url上存在参数后，自动补充参数错误的BUG
