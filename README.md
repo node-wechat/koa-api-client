@@ -225,10 +225,10 @@ now, client use camel mode data without server side changes
 ### update list
 
 ##### 1.2.0
-1.add advanced options requestMiddleware, you can set make some changes before and after request
-2.export injectLogger from ApiClient module directly, not from instance config
-3.add dataParser to custom convert data
-4.remove log4js module, accept log implement from option params. 
+1. add advanced options requestMiddleware, you can set make some changes before and after request
+2. export injectLogger from ApiClient module directly, not from instance config
+3. add dataParser to custom convert data
+4. remove log4js module, accept log implement from option params. 
 
 ##### 2.0.5
 use json5 to parse mock file, instead of json default
