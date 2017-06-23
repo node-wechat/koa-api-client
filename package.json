@@ -1,6 +1,6 @@
 {
   "name": "koa-api-client",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "co api client for http request",
   "main": "index.js",
   "scripts": {
