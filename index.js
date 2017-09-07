@@ -25,7 +25,7 @@ function ApiClient(baseUri, opts) {
     //initialize the beforeEnd filter for data
     //TODO 1. support async function to deal data
     //TODO 2. support funcitons before request do,or support middleware to handle before and after request
-    let beforeEnd =  [];
+    let beforeEnd = [];
     if (this.option.beforeEnd) {
         beforeEnd = beforeEnd.concat(this.option.beforeEnd);
     }
@@ -33,7 +33,7 @@ function ApiClient(baseUri, opts) {
         .filter(function (fn) {
             var accept = fn && typeof fn === 'function';
 
-            if(!accept){
+            if (!accept) {
                 console.warn('ApiClient: beforeEnd config has invalid value, must be function or function array');
             }
 
@@ -83,13 +83,6 @@ ApiClient.prototype.request = function (method, url, data, config) {
         promisify = this.composeRequest(request)
             .then(() => request.data)
             .then(res => {
-                //TODO 1. support async function to deal data
-                return apiClient.beforeEnd
-                    .reduce(function (data, fn) {
-                        return fn(data);
-                    }, res);
-            })
-            .then(res => {
                 //if record config has valid value, it need to be saved
                 //TODO how to deal the sence that the params(primary id) are in the url, like restful mode
                 if (recordConfig) {
@@ -99,7 +92,14 @@ ApiClient.prototype.request = function (method, url, data, config) {
             });
     }
 
-    return promisify;
+    return promisify
+        .then(res => {
+            //TODO 1. support async function to deal data
+            return apiClient.beforeEnd
+                .reduce(function (data, fn) {
+                    return fn(data);
+                }, res);
+        });
 };
 
 //自动设置相应的方法
