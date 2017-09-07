@@ -85,18 +85,18 @@ ApiClient.prototype.request = function*(method, url, data, config) {
 
         res = request.data;
 
-        //TODO 1. support async function to deal data
-        res = this.beforeEnd
-            .reduce(function (data, fn) {
-                return fn(data);
-            }, res);
-
         //if record config has valid value, it need to be saved
         //TODO how to deal the sence that the params(primary id) are in the url, like restful mode
         if (recordConfig) {
             yield mock.save(url, res, recordConfig);
         }
     }
+
+    //TODO support async function to deal data
+    res = this.beforeEnd
+        .reduce(function (data, fn) {
+            return fn(data);
+        }, res);
 
     return res;
 };
