@@ -145,6 +145,7 @@ apiClient.get('/xml').then(res => {});;
 
 ### 7.set data handler list by config.beforeEnd
 > not support in each request's config
+
 ```js
 var apiClient = new ApiClient(baseUri, Object.assign({
     beforeEnd: [
@@ -219,16 +220,16 @@ now, client use camel mode data without server side changes
 
 ## TODO
 1. 需要考虑如何支持参数在链接上形式下，数据如何模拟读取和保存
-2. 通过mock数据约定格式，校验后台生产环境返回的数据，避免格式变更导致的前端报错
-3. ~~增加自定义的数据过滤函数池，统一对后台返回数据做处理。例如，蛇底转换成驼峰~~(config.beforeEnd/config.requestMiddleware)
+1. 通过mock数据约定格式，校验后台生产环境返回的数据，避免格式变更导致的前端报错
+1. ~~增加自定义的数据过滤函数池，统一对后台返回数据做处理。例如，蛇底转换成驼峰~~(config.beforeEnd/config.requestMiddleware)
 
 ### update list
 
 ##### 1.2.0
 1. add advanced options requestMiddleware, you can set make some changes before and after request
-2. export injectLogger from ApiClient module directly, not from instance config
-3. add dataParser to custom convert data
-4. remove log4js module, accept log implement from option params. 
+1. export injectLogger from ApiClient module directly, not from instance config
+1. add dataParser to custom convert data
+1. remove log4js module, accept log implement from option params. 
 
 ##### 2.0.5
 use json5 to parse mock file, instead of json default
